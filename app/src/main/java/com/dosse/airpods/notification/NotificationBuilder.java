@@ -2,9 +2,11 @@ package com.dosse.airpods.notification;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.dosse.airpods.R;
 import com.dosse.airpods.pods.PodsStatus;
@@ -20,11 +22,14 @@ public class NotificationBuilder {
     private final RemoteViews[] mRemoteViews;
     private final NotificationCompat.Builder mBuilder;
 
+    private Context mContext = null;
+
     public NotificationBuilder(Context context) {
         mRemoteViews = new RemoteViews[] {
                 new RemoteViews(context.getPackageName(), R.layout.status_big),
                 new RemoteViews(context.getPackageName(), R.layout.status_small)
         };
+        mContext = context;
 
         mBuilder = new NotificationCompat.Builder(context, TAG);
         mBuilder.setShowWhen(false);
@@ -80,6 +85,16 @@ public class NotificationBuilder {
 
                 notification.setViewVisibility(R.id.leftInEarImg, regularPods.getInEarVisibility(RegularPods.LEFT));
                 notification.setViewVisibility(R.id.rightInEarImg, regularPods.getInEarVisibility(RegularPods.RIGHT));
+
+
+                Intent intent = new Intent("com.dosse.airpods.freshMainUI");
+                intent.putExtra("leftPod", regularPods.getParsedStatus(RegularPods.LEFT));
+                intent.putExtra("rightPod", regularPods.getParsedStatus(RegularPods.RIGHT));
+                intent.putExtra("podCase", regularPods.getParsedStatus(RegularPods.CASE));
+                LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(mContext);
+                localBroadcastManager.sendBroadcast(intent);
+
+
             } else {
                 SinglePods singlePods = (SinglePods)airpods;
 

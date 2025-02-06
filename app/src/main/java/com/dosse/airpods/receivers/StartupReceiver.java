@@ -23,6 +23,7 @@ public class StartupReceiver extends BroadcastReceiver {
     }
 
     public static void startPodsService(Context context) {
+        // 启动1个前台service
         context.startForegroundService(new Intent(context, PodsService.class));
     }
 

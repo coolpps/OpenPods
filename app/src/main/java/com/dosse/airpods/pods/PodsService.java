@@ -15,7 +15,9 @@ import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.ParcelUuid;
 import android.provider.Settings;
 
@@ -131,16 +133,19 @@ public class PodsService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        //将自身提升为前台服务
         startForeground(101, createBackgroundNotification());
 
+        // 如果蓝牙接收器已打开,先取消接收器??
         unregisterBtReceiver();
 
+        // 注册1个蓝牙接收器
         mBluetoothReceiver = new BluetoothReceiver() {
             @Override
             public void onStart() {
                 // Bluetooth turned on, start/restart scanner.
                 Logger.debug("BT ON");
-                startAirPodsScanner();
+                startAirPodsScanner();  // 开始扫描airpods
             }
 
             @Override
@@ -148,13 +153,13 @@ public class PodsService extends Service {
                 // Bluetooth turned off, stop scanner and remove notification.
                 Logger.debug("BT OFF");
                 mMaybeConnected = false;
-                stopAirPodsScanner();
+                stopAirPodsScanner();  // 取消扫描airpods
             }
 
             @Override
             public void onConnect(BluetoothDevice bluetoothDevice) {
                 // Airpods filter
-                if (checkUUID(bluetoothDevice)) {
+                if (checkUUID(bluetoothDevice)) {   // 如果校验耳机的UUID时airpods的则表示蓝牙已链接
                     // Airpods connected, show notification.
                     Logger.debug("ACL CONNECTED");
                     mMaybeConnected = true;
@@ -162,7 +167,7 @@ public class PodsService extends Service {
             }
 
             @Override
-            public void onDisconnect(BluetoothDevice bluetoothDevice) {
+            public void onDisconnect(BluetoothDevice bluetoothDevice) {  // 蓝牙和airpods耳机断开
                 // Airpods filter
                 if (checkUUID(bluetoothDevice)) {
                     // Airpods disconnected, remove notification but leave the scanner going.
@@ -173,11 +178,13 @@ public class PodsService extends Service {
         };
 
         try {
+            // 注册蓝牙广播
             registerReceiver(mBluetoothReceiver, BluetoothReceiver.buildFilter());
         } catch (Throwable t) {
             Logger.error(t);
         }
 
+        // 耳机已连接后才打开app, 上面注册的Broadcast收不到,需要主动读取蓝牙适配器
         // This BT Profile Proxy allows us to know if airpods are already connected when the app is started.
         // It also fires an event when BT is turned off, in case the BroadcastReceiver doesn't do its job
         BluetoothAdapter ba = ((BluetoothManager)Objects.requireNonNull(getSystemService(Context.BLUETOOTH_SERVICE))).getAdapter();
@@ -208,6 +215,7 @@ public class PodsService extends Service {
         }
 
         // Screen on/off listener to suspend scanning when the screen is off, to save battery
+        // 省电,锁屏时不扫描不监听
         unregisterScreenReceiver();
 
         if (isSavingBattery(getApplicationContext())) {
@@ -277,7 +285,7 @@ public class PodsService extends Service {
                     return mStatus;
                 }
             };
-            mNotificationThread.start();
+            mNotificationThread.start();  //开始线程刷新notification,包含电量/状态等
         }
         return START_STICKY;
     }

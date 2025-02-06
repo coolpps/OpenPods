@@ -8,13 +8,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 public abstract class BluetoothReceiver extends BroadcastReceiver {
-    public abstract void onStart();
+    public abstract void onStart(); //打开蓝牙
 
-    public abstract void onStop();
+    public abstract void onStop(); //关闭蓝牙
 
-    public abstract void onConnect(BluetoothDevice bluetoothDevice);
+    public abstract void onConnect(BluetoothDevice bluetoothDevice);  //蓝牙链接上耳机
 
-    public abstract void onDisconnect(BluetoothDevice bluetoothDevice);
+    public abstract void onDisconnect(BluetoothDevice bluetoothDevice);  //蓝牙和耳机断链
 
     /**
      * When the service is created, we register to get as many bluetooth and airpods related events as possible.

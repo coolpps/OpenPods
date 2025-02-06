@@ -20,7 +20,7 @@ public class MIUIWarning {
 
             try {
                 appContext.openFileInput("miuiwarn").close();
-            } catch (Throwable ignored) {
+            } catch (Throwable ignored) { //没有miuiwarn文件时抛出FileNotFoundException,或者读取文件有一场抛出时,被catch捕获
                 showAlertDialog(appContext);
             }
         } catch (Throwable ignored) {

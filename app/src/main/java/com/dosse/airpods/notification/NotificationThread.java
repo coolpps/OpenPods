@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 
 import com.dosse.airpods.pods.PodsStatus;
+import com.dosse.airpods.pods.models.RegularPods;
 import com.dosse.airpods.utils.Logger;
 
 import static com.dosse.airpods.notification.NotificationBuilder.NOTIFICATION_ID;
@@ -54,14 +56,20 @@ public abstract class NotificationThread extends Thread {
         while (!Thread.interrupted()) {
             PodsStatus status = getStatus();
 
+            // 链接上耳机,并且没有都断链
             if (isConnected() && !status.isAllDisconnected()) {
-                if (!notificationShowing) {
+                if (!notificationShowing) { // 现在没有显示通知
                     Logger.debug("Creating notification");
                     notificationShowing = true;
                 }
                 Logger.debug(status.getAirpods().parseStatusForLogger());
-                mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build(status));
-            } else {
+                mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build(status));   //刷新状态栏
+
+                /**
+                 * 需要在这里补充刷新主页面的实现,可以参考上面的notification
+                 * */
+
+            } else { // 断链了
                 if (notificationShowing) {
                     Logger.debug("Removing notification");
                     notificationShowing = false;

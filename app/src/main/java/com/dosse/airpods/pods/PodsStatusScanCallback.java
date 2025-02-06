@@ -34,6 +34,7 @@ public abstract class PodsStatusScanCallback extends ScanCallback {
 
     public abstract void onStatus(PodsStatus status);
 
+    //蓝牙扫描的过滤条件
     public static List<ScanFilter> getScanFilters() {
         byte[] manufacturerData = new byte[AIRPODS_DATA_LENGTH];
         byte[] manufacturerDataMask = new byte[AIRPODS_DATA_LENGTH];
@@ -59,6 +60,7 @@ public abstract class PodsStatusScanCallback extends ScanCallback {
         super.onBatchScanResults(scanResults);
     }
 
+    //处理回调扫描到的设备信息
     @Override
     public void onScanResult(int callbackType, ScanResult result) {
         try {
